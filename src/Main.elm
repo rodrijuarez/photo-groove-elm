@@ -10,16 +10,27 @@ import MainCss
     Html.CssHelpers.withNamespace "photogroove"
 
 
+urlPrefix =
+    "http://elm-in-action.com/"
+
+
+initialModel =
+    [ { url = "1.jpeg" }
+    , { url = "2.jpeg" }
+    , { url = "3.jpeg" }
+    ]
+
+
+viewThumbnail thumbnail =
+    img [ src (urlPrefix ++ thumbnail.url) ] []
+
+
 view model =
     div [ class [ MainCss.Content ] ]
         [ h1 [] [ Html.text "Photo Groove" ]
-        , div [ id "thumbnails" ]
-            [ img [ src "http://elm-in-action.com/1.jpeg" ] []
-            , img [ src "http://elm-in-action.com/2.jpeg" ] []
-            , img [ src "http://elm-in-action.com/3.jpeg" ] []
-            ]
+        , div [ id "thumbnails" ] (List.map viewThumbnail model)
         ]
 
 
 main =
-    view "no model yet"
+    view initialModel
