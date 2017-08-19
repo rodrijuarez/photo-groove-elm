@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html exposing (div, h1, img, text)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
+import Html.Events exposing (..)
 import MainCss
 
 
@@ -25,15 +26,27 @@ initialModel =
 
 
 viewThumbnail selectedThumbnail thumbnail =
-    img [ src (urlPrefix ++ thumbnail.url), classList [ ( MainCss.Selected, selectedThumbnail == thumbnail.url ) ] ] []
+    img [ src (urlPrefix ++ thumbnail.url), classList [ ( MainCss.Selected, selectedThumbnail == thumbnail.url ) ], onClick { operation = "SELECT_PHOTO", data = thumbnail.url } ] []
+
+
+update msg model =
+    if msg.operation == "SELECT_PHOTO" then
+        { model | selected = msg.data }
+    else
+        model
 
 
 view model =
     div [ class [ MainCss.Content ] ]
         [ h1 [] [ Html.text "Photo Groove" ]
-        , div [ id "thumbnails" ] (List.map (\photo -> viewThumbnail model.selected photo) model.photos)
+        , div [ id "thumbnails" ] (List.map (viewThumbnail model.selected) model.photos)
+        , img [ class [ MainCss.Large ], src (urlPrefix ++ "large/" ++ model.selected) ] []
         ]
 
 
 main =
-    view initialModel
+    Html.beginnerProgram
+        { view = view
+        , model = initialModel
+        , update = update
+        }
