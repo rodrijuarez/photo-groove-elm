@@ -76,17 +76,17 @@ viewThumbnail selectedThumbnail thumbnail =
     img [ src (urlPrefix ++ thumbnail.url), classList [ ( "selected", selectedThumbnail == thumbnail.url ) ], onClick (SelectByUrl thumbnail.url) ] []
 
 
-viewSizeChooser : ThumbnailSize -> Html.Html Msg
-viewSizeChooser size =
+viewSizeChooser : ThumbnailSize -> ThumbnailSize -> Html.Html Msg
+viewSizeChooser chosenSize size =
     label []
-        [ input [ type_ "radio", name "size", onClick (ChangeSize size) ] []
+        [ input [ type_ "radio", name "size", onClick (ChangeSize size), checked (chosenSize == size) ] []
         , text (sizeToString size)
         ]
 
 
-viewSizesChooser : List (Html.Html Msg)
-viewSizesChooser =
-    List.map viewSizeChooser [ Small, Medium, Large ]
+viewSizesChooser : ThumbnailSize -> List (Html.Html Msg)
+viewSizesChooser chosenSize =
+    List.map (viewSizeChooser chosenSize) [ Small, Medium, Large ]
 
 
 getRandomPhotoURL : String
@@ -123,7 +123,7 @@ view model =
         [ h1 [] [ Html.text "Photo Groove" ]
         , button [ onClick SurpriseMe ] [ text "Surprise me!!!" ]
         , h3 [] [ text "Thumbnail Size:" ]
-        , div [ id "choose-size" ] (viewSizesChooser)
+        , div [ id "choose-size" ] (viewSizesChooser model.chosenSize)
         , div [ id "thumbnails", class (sizeToString model.chosenSize) ] (List.map (viewThumbnail model.selected) model.photos)
         , img [ class "large", src (urlPrefix ++ "large/" ++ model.selected) ] []
         ]
