@@ -2,6 +2,6 @@
   "scripts": {
     "build": "npm run buildjs && npm run buildcss",
     "buildcss": "elm-css src/Stylesheets.elm",
-    "buildjs": "elm-make src/Main.elm --output elm.js"
+    "buildjs": "elm-make src/Main.elm --warn --output elm.js"
   }
 }
