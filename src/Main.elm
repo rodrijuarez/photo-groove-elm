@@ -1,29 +1,33 @@
 module Main exposing (..)
 
 import Array exposing (Array)
-import Html exposing (div, h1, img, text, button)
+import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.CssHelpers
 import Html.Events exposing (..)
 import MainCss
-
-
-{ id, class, classList } =
-    Html.CssHelpers.withNamespace "photogroove"
 
 
 type alias Photo =
     { url : String }
 
 
-type alias Msg =
-    { operation : String, data : String }
+type Msg
+    = SelectByUrl String
+    | SurpriseMe
+    | ChangeSize ThumbnailSize
+
+
+type ThumbnailSize
+    = Small
+    | Medium
+    | Large
 
 
 type alias Model =
     { photos :
         List Photo
     , selected : String
+    , chosenSize : ThumbnailSize
     }
 
 
@@ -40,6 +44,7 @@ initialModel =
         , { url = "3.jpeg" }
         ]
     , selected = "1.jpeg"
+    , chosenSize = Medium
     }
 
 
@@ -53,30 +58,74 @@ selectPhoto =
     { operation = "SELECT_PHOTO", data = { url = "1.jpeg" } }
 
 
+sizeToString : ThumbnailSize -> String
+sizeToString size =
+    case size of
+        Small ->
+            "small"
+
+        Medium ->
+            "med"
+
+        Large ->
+            "large"
+
+
 viewThumbnail : String -> Photo -> Html.Html Msg
 viewThumbnail selectedThumbnail thumbnail =
-    img [ src (urlPrefix ++ thumbnail.url), classList [ ( MainCss.Selected, selectedThumbnail == thumbnail.url ) ], onClick { operation = "SELECT_PHOTO", data = thumbnail.url } ] []
+    img [ src (urlPrefix ++ thumbnail.url), classList [ ( "selected", selectedThumbnail == thumbnail.url ) ], onClick (SelectByUrl thumbnail.url) ] []
 
 
+viewSizeChooser : ThumbnailSize -> Html.Html Msg
+viewSizeChooser size =
+    label []
+        [ input [ type_ "radio", name "size", onClick (ChangeSize size) ] []
+        , text (sizeToString size)
+        ]
+
+
+viewSizesChooser : List (Html.Html Msg)
+viewSizesChooser =
+    List.map viewSizeChooser [ Small, Medium, Large ]
+
+
+getRandomPhotoURL : String
+getRandomPhotoURL =
+    getPhotoUrl 2
+
+
+getPhotoUrl : Int -> String
+getPhotoUrl index =
+    case Array.get index photoArray of
+        Just photo ->
+            photo.url
+
+        Nothing ->
+            ""
+
+
+update : Msg -> Model -> Model
 update msg model =
-    case msg.operation of
-        "SELECT_PHOTO" ->
-            { model | selected = msg.data }
+    case msg of
+        SelectByUrl url ->
+            { model | selected = url }
 
-        "SURPRISE_ME" ->
-            { model | selected = "2.jpeg" }
+        SurpriseMe ->
+            { model | selected = getRandomPhotoURL }
 
-        _ ->
-            model
+        ChangeSize size ->
+            { model | chosenSize = size }
 
 
 view : Model -> Html.Html Msg
 view model =
-    div [ class [ MainCss.Content ] ]
+    div [ class "content" ]
         [ h1 [] [ Html.text "Photo Groove" ]
-        , button [ onClick { operation = "SURPRISE_ME", data = "" } ] [ text "Surprise me!!!" ]
-        , div [ id "thumbnails" ] (List.map (viewThumbnail model.selected) model.photos)
-        , img [ class [ MainCss.Large ], src (urlPrefix ++ "large/" ++ model.selected) ] []
+        , button [ onClick SurpriseMe ] [ text "Surprise me!!!" ]
+        , h3 [] [ text "Thumbnail Size:" ]
+        , div [ id "choose-size" ] (viewSizesChooser)
+        , div [ id "thumbnails", class (sizeToString model.chosenSize) ] (List.map (viewThumbnail model.selected) model.photos)
+        , img [ class "large", src (urlPrefix ++ "large/" ++ model.selected) ] []
         ]
 
 
