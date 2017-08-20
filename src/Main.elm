@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Array exposing (Array)
-import Html exposing (div, h1, img, text)
+import Html exposing (div, h1, img, text, button)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (..)
@@ -59,16 +59,22 @@ viewThumbnail selectedThumbnail thumbnail =
 
 
 update msg model =
-    if msg.operation == "SELECT_PHOTO" then
-        { model | selected = msg.data }
-    else
-        model
+    case msg.operation of
+        "SELECT_PHOTO" ->
+            { model | selected = msg.data }
+
+        "SURPRISE_ME" ->
+            { model | selected = "2.jpeg" }
+
+        _ ->
+            model
 
 
 view : Model -> Html.Html Msg
 view model =
     div [ class [ MainCss.Content ] ]
         [ h1 [] [ Html.text "Photo Groove" ]
+        , button [ onClick { operation = "SURPRISE_ME", data = "" } ] [ text "Surprise me!!!" ]
         , div [ id "thumbnails" ] (List.map (viewThumbnail model.selected) model.photos)
         , img [ class [ MainCss.Large ], src (urlPrefix ++ "large/" ++ model.selected) ] []
         ]
