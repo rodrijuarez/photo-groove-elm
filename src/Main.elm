@@ -86,6 +86,13 @@ newSelected index photos =
         |> Maybe.map .url
 
 
+randomPhotoPicker : List Photo -> Generator Int
+randomPhotoPicker photos =
+    List.length photos
+        - 1
+        |> Random.int 0
+
+
 viewLarge : Maybe String -> Html.Html Msg
 viewLarge selectedUrl =
     case selectedUrl of
@@ -103,11 +110,7 @@ update msg model =
             ( { model | selected = Just url }, Cmd.none )
 
         SurpriseMe ->
-            let
-                randomPhotoPicker =
-                    Random.int 0 (List.length model.photos - 1)
-            in
-                ( model, Random.generate SelectByIndex randomPhotoPicker )
+            ( model, Random.generate SelectByIndex (randomPhotoPicker model.photos) )
 
         SelectByIndex index ->
             ( { model | selected = newSelected index model.photos }, Cmd.none )
