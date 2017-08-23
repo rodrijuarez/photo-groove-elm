@@ -133,12 +133,10 @@ update msg model =
         ChangeSize size ->
             ( { model | chosenSize = size }, Cmd.none )
 
-        LoadPhotos result ->
-            case result of
-                Ok response ->
+        LoadPhotos (Ok response) ->
                     ( { model | photos = parsePhotosResponse response }, Cmd.none )
 
-                Err error ->
+        LoadPhotos (Err _) ->
                     ( model, Cmd.none )
 
 
