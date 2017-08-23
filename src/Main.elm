@@ -115,7 +115,7 @@ parsePhotosResponse : String -> List Photo
 parsePhotosResponse response =
     response
         |> String.split ","
-        |> List.map (\url -> { url = url })
+        |> List.map Photo
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
