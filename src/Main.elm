@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Random exposing (..)
+import Http exposing (..)
 
 
 type alias Photo =
@@ -16,6 +17,7 @@ type Msg
     | SelectByIndex Int
     | SurpriseMe
     | ChangeSize ThumbnailSize
+    | LoadPhotos (Result Error String)
 
 
 type ThumbnailSize
@@ -103,6 +105,19 @@ viewLarge selectedUrl =
             text ""
 
 
+getPhotos : Cmd Msg
+getPhotos =
+    Http.send LoadPhotos <|
+        Http.getString "http://elm-in-action.com/photos/list"
+
+
+parsePhotosResponse : String -> List Photo
+parsePhotosResponse response =
+    response
+        |> String.split ","
+        |> List.map (\url -> { url = url })
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -117,6 +132,14 @@ update msg model =
 
         ChangeSize size ->
             ( { model | chosenSize = size }, Cmd.none )
+
+        LoadPhotos result ->
+            case result of
+                Ok response ->
+                    ( { model | photos = parsePhotosResponse response }, Cmd.none )
+
+                Err error ->
+                    ( model, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -135,7 +158,7 @@ main : Program Never Model Msg
 main =
     Html.program
         { view = view
-        , init = ( initialModel, Cmd.none )
+        , init = ( initialModel, getPhotos )
         , update = update
         , subscriptions = (\model -> Sub.none)
         }
