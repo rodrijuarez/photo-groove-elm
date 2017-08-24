@@ -147,7 +147,7 @@ update msg model =
                 ( { model | photos = photos, selected = selected }, Cmd.none )
 
         LoadPhotos (Err _) ->
-            ( model, Cmd.none )
+            ( { model | loadingError = Just "An error ocurred, try turning off and on again!" }, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -162,10 +162,23 @@ view model =
         ]
 
 
+viewOrError : Model -> Html.Html Msg
+viewOrError model =
+    case model.loadingError of
+        Nothing ->
+            view model
+
+        Just errorMessage ->
+            div [ class "error-message" ]
+                [ h1 [] [ Html.text "Photo Groove" ]
+                , p [] [ text errorMessage ]
+                ]
+
+
 main : Program Never Model Msg
 main =
     Html.program
-        { view = view
+        { view = viewOrError
         , init = ( initialModel, getPhotos )
         , update = update
         , subscriptions = \_ -> Sub.none
