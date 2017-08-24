@@ -107,12 +107,13 @@ viewLarge selectedUrl =
 
 getPhotos : Cmd Msg
 getPhotos =
-    Http.send LoadPhotos <|
-        Http.getString "http://elm-in-action.com/photos/list"
+    "http://elm-in-action.com/photos/list"
+        |> Http.getString
+        |> Http.send LoadPhotos
 
 
-parsePhotosResponse : String -> List Photo
-parsePhotosResponse response =
+loadPhotos : String -> List Photo
+loadPhotos response =
     response
         |> String.split ","
         |> List.map Photo
@@ -134,10 +135,19 @@ update msg model =
             ( { model | chosenSize = size }, Cmd.none )
 
         LoadPhotos (Ok response) ->
-                    ( { model | photos = parsePhotosResponse response }, Cmd.none )
+            let
+                photos =
+                    loadPhotos response
+
+                selected =
+                    response
+                        |> String.split ","
+                        |> List.head
+            in
+                ( { model | photos = photos, selected = selected }, Cmd.none )
 
         LoadPhotos (Err _) ->
-                    ( model, Cmd.none )
+            ( model, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -158,5 +168,5 @@ main =
         { view = view
         , init = ( initialModel, getPhotos )
         , update = update
-        , subscriptions = (\model -> Sub.none)
+        , subscriptions = \_ -> Sub.none
         }
